@@ -486,7 +486,7 @@ int main(int argc, char *argv[]) {
 	struct Fork *p_fork;
 	struct Exit *E;
 	int i = 0, j, comp_ID, dest_ID, fork;
-	char comp_type;
+	char stn_type;
 	//double avg_gen, avg_serv_time,sum_prob;
 	double avg_gen, sum_prob,avg_delta;
 	int **graph; //adjancet martix of DES topology graph
@@ -570,7 +570,7 @@ int main(int argc, char *argv[]) {
 	i=0;
 	fscanf(fp, "%*[^\n]\n");//skip one  input line;
 	while (i < cngline) {
-		fscanf(fp, "%d %c", &comp_ID, &comp_type);
+		fscanf(fp, "%d %c", &comp_ID, &stn_type);
 		//ASSERT(comp_ID == i);
 		//if (check_ID(i,comp_ID,cngline)==-1) return -1;
 
@@ -578,8 +578,8 @@ int main(int argc, char *argv[]) {
 		comp_ID=bfind(idx,cngline,comp_ID);//comp_ID mapping;
 		ASSERT(comp_ID!=-1);
 
-		stn_list[comp_ID].StationType = comp_type;
-		if (comp_type == 'G') {
+		stn_list[comp_ID].StationType = stn_type;
+		if (stn_type == 'G') {
 
 			//GENERATOR
 			stn_list[comp_ID].StationType=GENERATOR;
@@ -621,7 +621,7 @@ int main(int argc, char *argv[]) {
 
 
 
-		else if (comp_type == 'Q') {  //QUEUE
+		else if (stn_type == 'Q') {  //QUEUE
 			stn_list[comp_ID].StationType=SERVICE_STATION;
 			Q = (struct Queue*) malloc(sizeof(struct Queue));
 			head = FIFO_creat();
@@ -677,7 +677,7 @@ int main(int argc, char *argv[]) {
 			Q->Now_Event=NULL;
 			stn_list[comp_ID].Stn = Q;
 
-		} else if (comp_type == 'E') {
+		} else if (stn_type == 'E') {
 			stn_list[comp_ID].StationType=EXIT;
 			E = malloc(sizeof(struct Exit));
 			stn_list[comp_ID].Stn = E;
@@ -687,11 +687,11 @@ int main(int argc, char *argv[]) {
 			E->total_time=0;
 
 
-		} else if(comp_type == 'A')
+		} else if(stn_type == 'A')
 		{
 			//process "AND" 
 		}
-		else if(comp_type == 'A')
+		else if(stn_type == 'A')
 		{
 			//process "EXT_SUPP"
 		}

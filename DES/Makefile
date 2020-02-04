@@ -3,7 +3,7 @@ PROJECT_ROOT = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 ifneq  ($(OS:Windows%=WIN) ,WIN)
 
-#  No Windows
+#  Not Windows
 EXE = sim6730
 else
 
