@@ -44,7 +44,7 @@ Execution
 
 Assuming your executable is called "sim6730", run it using
 
-    ./sim6730 1000.0 config_a6 output
+    ./sim6730 1000.0 config output
 
 where the second value indicates the amount of time the simulator should run. You may specify the file name of the output file.
     
