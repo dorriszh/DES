@@ -6,8 +6,8 @@
 #ifdef PriQueue
 
 //
-//    header node is a dummy£º,do not store data ,only to  count the queue;
-//    data   store after the header node
+//    header node is a dummy,do not store data ,only store the cnt of the queue;
+//    data will be stored after the header node
 
 
 //    init the queue
@@ -15,14 +15,14 @@ PrioQ* PQ_Create() {
 	PrioQ *queue;
 	queue = (PrioQ*) malloc(sizeof(PrioQ));    //    Allocate a dummy
 	ASSERT(queue!=NULL);
-	/*if (queue == NULL) {        //    memory allocation success?
+	/*if (queue == NULL) {        //  Is memory allocation successful?
 	 printf("memory allocation failed...");
 	 exit(-1);
 	 }*/
-	queue->Next = NULL; //    init queue to NULL
+	queue->Next = NULL; //    init queue with NULL
 	queue->data=NULL;
 
-	queue->val.Qcount = 0; //  Count set to 0,queue item is empty
+	queue->val.Qcount = 0; //  Set count to 0, queue is empty
 	//printf("create success ...\n");
 	return queue;
 }
@@ -30,11 +30,11 @@ PrioQ* PQ_Create() {
 //    is the queue empty?
 bool PQ_IsEmp(PrioQ *queue) {
 	if (queue == NULL) {
-		printf("ERROR NULL QUEUE.....\n");
+		printf("ERROR, NULL QUEUE.....\n");
 		exit(-1);
 	}
 	if (queue->Next == NULL) {
-		printf("queue is empty...\n");
+		printf("The queue is empty...\n");
 		return true;
 	} else {
 		//printf("queue is not empty...\n");
@@ -43,16 +43,17 @@ bool PQ_IsEmp(PrioQ *queue) {
 
 }
 //   
-//    insert the key in the queue ,location defined  by order of the key
+//    insert the data in the queue
+//    location is determined  by the order of the key
 int PQ_Insert(PrioQ *queue, double key, void *data) {
 	PrioQ *New, *P;
-	New = (PrioQ*) malloc(sizeof(PrioQ)); //    allocation memmory for queue item
+	New = (PrioQ*) malloc(sizeof(PrioQ)); //    allocate memory for queue item
 	ASSERT(New!=NULL);
 	/*if (New == NULL) {
 	 printf("alloction failed for key :%f...", key);
 	 return -1;
 	 }*/
-	New->val.key = key;    //    set key & data  to item of node
+	New->val.key = key;    //    set key & data
 	New->data = data;
 	P = queue;
 	while (P->Next != NULL)
@@ -60,9 +61,9 @@ int PQ_Insert(PrioQ *queue, double key, void *data) {
 			P = P->Next;
 		} else
 			break;
-	New->Next = P->Next; // SET the pointer 
+	New->Next = P->Next; // Set the pointer
 	P->Next = New;
-	queue->val.Qcount++; //set the count 
+	queue->val.Qcount++; //Set the count
 
 	//printf("insert  %f success...\n", key);
 	return 0;
@@ -70,13 +71,13 @@ int PQ_Insert(PrioQ *queue, double key, void *data) {
 }
 
 //
-//    delete first data item
-//    if success £¬return the key ,else  return -1
+//    delete an item
+//    if succeed, return the key ,else  return -1
 void* PQ_Delete(PrioQ *PQ, double *key) {
 	PrioQ *P;
 	void *data;
 	if (PQ_IsEmp(PQ)) {
-		printf("Queue is empty,delete fail\n");
+		printf("The queue is empty, deletion fails\n");
 		return NULL;
 
 	}
@@ -90,7 +91,7 @@ void* PQ_Delete(PrioQ *PQ, double *key) {
 	return data;
 
 }
-//    visit all around
+//    traverse and print
 void PQ_print(PrioQ *queue) {
 	PrioQ *P;
 	int i = 1;
@@ -99,9 +100,9 @@ void PQ_print(PrioQ *queue) {
 		printf(" It is empty!!! \n");
 		return;
 	}
-	P = queue->Next;    //all around from first data item £¨no dummy node £©
+	P = queue->Next;    //scan all around from first data item except the dummy
 
-	printf("Queue list is£º\n");
+	printf("The queue is \n");
 	while (P != NULL) {
 		printf("%d     %f \n", i++, P->val.key);
 		P = P->Next;
@@ -112,7 +113,7 @@ void PQ_print(PrioQ *queue) {
 //    Free Queue
 
 void PQ_free(PrioQ *queue, void (*freedata)(void * data)) {
-	//free memory of PQ queue. if freedata is not NULL ,call freedata free the data space
+	//free memory of PQ. if freedata is not NULL ,call freedata and free the data space
 	PrioQ *P, *Q;
 	P = queue->Next; //First Node
 
@@ -128,7 +129,7 @@ void PQ_free(PrioQ *queue, void (*freedata)(void * data)) {
 	//printf("Free Queue Success...\n");
 }
 
-//return the item number in the queue
+//return the number of item in the queue
 int PQ_count(PrioQ *queue) {
 	//printf("count is %d \n", queue->val.Qcount);
 	return queue->val.Qcount;
@@ -148,12 +149,12 @@ void* FIFO_creat() {
 void FIFO_in(FF_head_t *FF_p, void *inqueue) {
 	FF_node_t *FF_node_item;
 	FF_node_item = malloc(sizeof(FF_node_t));
-	FF_node_item->next=NULL;  //set  FIFO data node
+	FF_node_item->next=NULL;  //set FIFO data node
 	FF_p->cnt++;
 	FF_node_item->data = inqueue;
 	if (FF_p->tail == NULL) {
 
-		//a empty queqe, set header & tail
+		//an empty queue, set header & tail
 		FF_p->header = FF_node_item;
 		FF_p->tail = FF_node_item;
 	} else {
@@ -164,7 +165,7 @@ void FIFO_in(FF_head_t *FF_p, void *inqueue) {
 	}
 }
 void* FIFO_out(FF_head_t *FF_p)
-//return  a term from FIFO,if empty ,return NULL
+//return an item from FIFO,if empty ,return NULL
 {
 	FF_node_t *ret_node;
 	void *ret_data;
@@ -174,15 +175,19 @@ void* FIFO_out(FF_head_t *FF_p)
 	ret_node = FF_p->header;
 	FF_p->header = FF_p->header->next;	//set new header
 	if (FF_p->header == NULL)
-		FF_p->tail = NULL;	//after out ,it is empty, set tail
+		FF_p->tail = NULL;	//after out, it is empty, set tail
 	ret_data = ret_node->data;
 	free(ret_node);	//free Queue item
-	return ret_data; //return pointer to  Queue data
+	return ret_data; //return pointer to Queue data
 
 }
 int  FIFO_count(FF_head_t *FF_p)
 {
+	if (FF_p==NULL) return 0;
+	else
+	{
 	return(FF_p->cnt);
+	}
 }
 bool FIFO_isempty(FF_head_t *FF_p) {
 	if (FF_p->tail == NULL)
@@ -233,7 +238,7 @@ int bfind (int *idx ,int len,int key)//Binary search for comp_ID
 	return -1;
 }
 
-void merge_sort(int i,int j, int * idx,int *tmp) //merge sort data in idx ,tmp is temporary  space
+void merge_sort(int i,int j, int * idx,int *tmp) //merge sort data in idx ,tmp is temporary space
 {
 	int k = 0;
 
@@ -247,7 +252,7 @@ void merge_sort(int i,int j, int * idx,int *tmp) //merge sort data in idx ,tmp i
 	int m = i;
 	int n = k + 1;
 
-	while (m < k + 1 && n < j + 1) {//smaller to  tmp array
+	while (m < k + 1 && n < j + 1) {//smaller one goes to tmp array
 		if (idx[m] <= idx[n]) {
 
 			tmp[l++] = idx[m++];
@@ -257,17 +262,17 @@ void merge_sort(int i,int j, int * idx,int *tmp) //merge sort data in idx ,tmp i
 		}
 	}
 
-	while (m < k + 1) {// (K+1 to j) sequence have exhausted,the rest of (i to k) to tmp
+	while (m < k + 1) {// (K+1 to j) sequence have exhausted,the rest of (i to k) goes to tmp
 
 		tmp[l++] = idx[m++];
 	}
 
-	while (n < j + 1) {// (i to k) sequence have exhausted,the rest of (k+1 to j) to tmp
+	while (n < j + 1) {// (i to k) sequence have exhausted,the rest of (k+1 to j) goes to tmp
 
 		tmp[l++] = idx[n++];
 	}
 
-	for (m = i; m <= j; m++) {//copy tmp to original degree array
+	for (m = i; m <= j; m++) {//copy tmp to original array
 
 		idx[m] = tmp[m];
 	}
@@ -275,7 +280,7 @@ void merge_sort(int i,int j, int * idx,int *tmp) //merge sort data in idx ,tmp i
 }
 
 int connect(int **graph, int n, int i, void *FIFO_q)
-//Check DES topology connectivity between station & EXIT,Breath First  search
+//Check DES topology connectivity between station & EXIT,Breath First Search
 {
 	int j, *e_in;
 	for (j = 0; j < n; j++)
@@ -295,7 +300,7 @@ int connect(int **graph, int n, int i, void *FIFO_q)
 }
 
 int connect0(int **graph, int n, int i, void *FIFO_q)
-//Check DES topology connectivity between station & GENERATOR,Breath First  search
+//Check DES topology connectivity between station & GENERATOR,Breath First Search
 {
 	int j, *e_in;
 	for (j = 0; j < n; j++)
@@ -315,7 +320,7 @@ int connect0(int **graph, int n, int i, void *FIFO_q)
 }
 
 
-void free_conn( void * p) //free connect queue vex  memory
+void free_conn( void * p) //free connected queue vertex memory
 {
 
 		free(p);

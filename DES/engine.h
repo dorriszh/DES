@@ -12,10 +12,12 @@
 
 #define BUSY 1
 #define IDLE 0
+#define PART0 0
+#define PART1 1
 
 
 // A single data structure is used to handle all three event types
-//an  event data link between station and component
+//The event data link customer and component
 
 //***************
 //***************
@@ -24,24 +26,29 @@
 //                        Key data!!!!!!!!!
 struct EventData {
 	int 		EventType;          // Type of event ( ARRIVAL, DEPARTURE)
-	struct 		Component *Comp; 	// Arriving or departing component;
-	int 		StationID;				// ID of station where component is created, arrives, or departs
-	double 		Event_begin_time;	//begin time of service(producing)
+	struct 		Product *Prod; 	// Arriving or departing product;
+	int 		CompID;				// ID of component where product is created, arrives, or departs
+	double 		Event_begin_time;	//begin time of service or queue
+	int 		Pre_compid;
+
 };
 
 
 
 //////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-//Gobal variable
+//Global variable
 //********************************************************************
 ///////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////
-struct Station *stn_list; //station list
+struct Component *comp_list; //component list (the list of workspace)
 
-PrioQ 	*FEL; //future event list (FEL)  is a priority queue
+PrioQ 	*FEL; //future event list (FEL), which is a priority queue
 
-int 	*idx;//map index to Stn ID
+int 	*idx;//mapping index (to Comp ID)
+int 	limit_cnt;
+int 	customID;
+int 	total_prod;
 
 
 //////////////////////////////////////////////////////////////////////
@@ -54,7 +61,7 @@ int 	*idx;//map index to Stn ID
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 //
-// Queueing Network Simulation
+// Queuing Network Simulation
 //
 /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -65,45 +72,44 @@ int 	*idx;//map index to Stn ID
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 // EVENT TYPES:
-//  GENERATE: Generation of a new component
-//      Parameters: Station where component is generated
+//  GENERATE: Generation of a new c
+//      Parameters: Component where prod is generated
 //
-//  DEPARTURE: a component departs from a queue station
+//  DEPARTURE: a prod departs from a queue station
 //      Parameters: ...
-//
-//	RELEASE: a component enter the station when service is not yet end
-//
-// Event types: Generate new component, arrival at a station, departure from queue station
+
+// Event types: Generation of new product, arrival at a component, departure from queue station
 //#define     GENERATE    0
 #define     ARRIVAL     1
 #define     DEPARTURE   2
-#define		RELEASE		3
 
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 //
-// Data Structures for Customers and FIFO queue
+// Data Structures for Products and FIFO queue
 //
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-// Component
-struct Component {
-	//struct Component *next; // pointer to next component when it is queued in a FIFO
-	int 		CompID;
-	double 		Generation_time; //time when component enter system
+// Product
+struct Product {
+	//struct Product *next; // pointer to next product when it is queued in a FIFO
+	int 		ProductID;
+	double 		Generation_time; //time when material enter system
 	double 		Que_time;//total queuing time through system
 	int 		Que_cnt;	//Queuing station count
 	double 		Cost;
+	int tag ; //if true switch by SWitch status  else by tag_part
+	int tag_part;
 };
 
 
-// Linked List of components (FIFO Queue)
+// Linked List of products (FIFO Queue)
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 //
-// Data Structures for Stations
+// Data Structures for Components
 //
 /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -111,16 +117,18 @@ struct Component {
 // Component types
 #define     GENERATOR       0
 
-#define     SERVICE_STATION   1
+#define     QUEUE_STATION   1
 #define     EXIT            2
 #define 	AND 			3
 #define  	EXTSUPP			4
+#define 	SELE 			5
 
 
 
-struct Station {
-	int 	StationType;  // GENERATOR, SERVICE_STATION, EXIT
-	void 	*Stn; // Pointer to information on station (Generator, Exit struct, etc.)
+struct Component {
+	int 	ComponentType;  // GENERATOR, QUEUE_STATION, EXIT
+	void 	*Comp; // Pointer to information on component (Generator, Exit struct, etc.)
+	FF_head_t * Comp_que;
 };
 
 
@@ -138,16 +146,16 @@ double CurrentTime(void);
 //  Event handler function: called to process an event
 void EventHandler(void *data);
 
-//fork to desition station when DEPARTURE
+//fork to destination station when DEPARTURE
 int fork_ID(int comp_ID);
 
 
 //function to generate an exponential random number
 double randexp(double U);
 
-//function to generate a Gauss random number parameter {0,1}
+//function to generate a Gaussian random number parameter {0,1}
 
-double randgauss( );
+double randgauss(double,double );
 
 
 

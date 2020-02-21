@@ -3,7 +3,7 @@ PROJECT_ROOT = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 ifneq  ($(OS:Windows%=WIN) ,WIN)
 
-#  Not Windows
+#  No Windows
 EXE = sim6730
 else
 
@@ -19,14 +19,14 @@ endif
 
 OBJS =  pq.o engine.o application.o
 
-ifeq ($(BUILD_MODE),debug)
+#ifeq ($(BUILD_MODE),debug)
 	CFLAGS += -g  -Wall
-else ifeq ($(BUILD_MODE),run)
-	CFLAGS += -O2 -Wall
-else
-	CFLAGS += -O2 -Wall
+#else ifeq ($(BUILD_MODE),run)
+#	CFLAGS += -O2 -Wall -g
+#else
+#	CFLAGS += -O2 -Wall -g
 	#@echo  Build mode $(BUILD_MODE) not supported by this Makefile
-endif
+#endif
 
 all:$(EXE)
 

@@ -35,13 +35,13 @@ int PQ_count(PrioQ*);
 
 
 
-typedef struct FF_node {   //node data of FIFO quqe
+typedef struct FF_node {   //node data of FIFO queue
 	struct FF_node *next;
 	void *data;
 
 } FF_node_t;
 
-typedef struct FF_que {  //FIFO queue heade data structure
+typedef struct FF_que {  //data structure for FIFO queue header
 	FF_node_t *header;
 	FF_node_t *tail;
 	int cnt;
@@ -61,6 +61,6 @@ int  FIFO_count(FF_head_t *);
 
 int bfind (int *,int ,int ); //Binary search
 void merge_sort(int ,int , int * ,int *); //merge  sort
-int connect(int ** ,int ,int ,void *);  //check station to EXIT
-int connect0(int ** ,int ,int ,void *); //check GENERATOR to this station
-void free_conn( void * ); //free data  of a FIFO queue  in connectivity
+int connect(int ** ,int ,int ,void *);  //check connectivity of station and EXIT
+int connect0(int ** ,int ,int ,void *); //check connectivity GENERATOR and this station
+void free_conn( void * ); //free data of a connected FIFO queue
