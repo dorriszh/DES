@@ -25,13 +25,13 @@
 //
 struct Generator {
 	double IntArrTime;	// mean interarrival time for generated components
-	double Delta;
+	double Delta;		// Standard Deviation
 	int DestComp;          	// ID of next component products are sent to
 	int Countprod; 		//set Product to unique "Identify  Number"(ProductID)
 	int Entercnt;			//Real product number entering system ;
 	double Cost;
-	int Limit_type;	//if true ,Next Queue >n number  ,generator do not depature
-	int Limit_status;	// is wait next station to 0;
+	int Limit_type;	//if true ,when Queue's number >n, generator stop
+	int Limit_status;
 	int Discard;
 	int Line;
 	FF_head_t *Next_que;
@@ -46,6 +46,8 @@ struct Fork {
 	int DestID;
 //	int CompCount;
 };
+
+// a switch for selecting compatible routes
 struct Select {
 	int Route_true_ID;
 //	FF_head_t * R1_Que;
@@ -71,7 +73,7 @@ struct Queue {
 	double server_time;		//behavior parameter of server
 	double server_delta;
 	struct EventData *Now_Event;
-	//Now, sevicing prod's infomation
+	//(Now being serviced) product's infomation
 	double Cost;
 	double Defective;
 
@@ -84,7 +86,7 @@ struct Exit {
 	int Count; 			// number of products that exited at this component
 	double total_time; // total time between  start  & end ,when the prod is in system
 	double total_cost;
-	int tag;
+	int tag;	//tag for defects and non-defects
 
 };
 
@@ -172,7 +174,7 @@ void Arrival(struct EventData *e) {
 	else if (comp_list[e->CompID].ComponentType == AND) {
 		int source_id = e->Pre_compid;
 		int i;
-		int de_flag;
+		int de_flag;	//flag indicating whether depart or not
 		struct And *pAnd;
 		struct EventData *cur_Event, *and_Event;
 		pAnd = comp_list[e->CompID].Comp;
@@ -186,7 +188,7 @@ void Arrival(struct EventData *e) {
 			}
 		}
 		de_flag = true;
-		//check  to assembly
+		//check for assembly
 		for (i = 0; i < pAnd->num; i++) {
 					printf("-----%d  %d\n",i,FIFO_count(pAnd->And_Que[i]));
 		}
@@ -199,7 +201,7 @@ void Arrival(struct EventData *e) {
 		}
 		if (de_flag == true)
 
-		{ //to next station
+		{ //depart to next station
 			cur_Event = (struct EventData*) FIFO_out(pAnd->And_Que[0]);
 			cur_Event->Event_begin_time = CurrentTime();
 			cur_Event->Pre_compid = e->CompID;
@@ -264,7 +266,7 @@ void Arrival(struct EventData *e) {
 			//start service
 			e->EventType = DEPARTURE;
 			//set service endtime
-			// add an  gauss  random number
+			// add a  gauss  random number
 			ts = CurrentTime()
 					+ randgauss(queue->server_time, queue->server_delta);
 			e->Prod->Cost += queue->Cost;
@@ -301,7 +303,7 @@ void NewProdt(int compID) {
 	ASSERT(NewProd!=NULL);
 	//if (pGen->Countprod>pGen->mult*total_prod) return;
 
-	NewProd->ProductID = customID++; // Product ID
+	NewProd->ProductID = prodID++; // Product ID
 
 	(pGen->Countprod)++;
 
@@ -320,7 +322,7 @@ void NewProdt(int compID) {
 	d->Prod->Que_cnt = 0;
 	d->Prod->Que_time = 0;
 
-	// to gauss  random number
+	// generate gauss  random number
 	ts = randgauss(pGen->IntArrTime, pGen->Delta);
 	// Time when prod will enter system ;
 	//if (ts<0.001) ts=0.001;
@@ -375,7 +377,7 @@ void Departure(struct EventData *e)
 			Arrival(e);
 		} else {
 			if (FIFO_count(pGen->Next_que) == 0)
-				pGen->Limit_status = false; // Queqe is null ,set status false
+				pGen->Limit_status = false; // Queue is null ,set status false
 			if (FIFO_count(pGen->Next_que)
 					<= limit_cnt&& pGen->Limit_status==false) {
 				Arrival(e);
@@ -564,7 +566,7 @@ int main(int argc, char *argv[]) {
 	//char prob[100];
 	FILE *fp;
 	int Err_input = 0;
-	customID = 0;
+	prodID = 0;
 	total_prod = 100;
 	limit_cnt = 100000;
 
@@ -834,7 +836,7 @@ int main(int argc, char *argv[]) {
 					}
 				}
 			}
-			//fill Generator que
+			//fill Generator queue
 
 		}
 
@@ -871,7 +873,7 @@ int main(int argc, char *argv[]) {
 			cost_sum += E->total_cost;
 		}
 
-		if (comp_list[i].ComponentType == QUEUE_STATION) { //statics queuing data of the station
+		if (comp_list[i].ComponentType == QUEUE_STATION) { //store queuing data of the station
 
 			FIFO_free(((struct Queue*) comp_list[i].Comp)->head, freedata);
 			free(((struct Queue*) comp_list[i].Comp)->Q_fork);

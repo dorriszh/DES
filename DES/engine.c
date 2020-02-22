@@ -67,7 +67,7 @@ void RunSim(double EndTime) {
 	}
 	printf("Run end\n");
 	printf("End time is %.2lf \n",Now);
-	//Now = EndTime;  // To statics queuing data
+	//Now = EndTime;  // To store queuing data
 
 
 }
@@ -79,7 +79,7 @@ double randgauss(double mean, double delta) {
 	static double U, V;
 	static int phase = 0;
 	double Z;
-	do  //generate parameter (0,1) gauss
+	do  //generate gaussian parameter (0,1)
 	{
 
 		if (phase == 0) {
@@ -91,7 +91,7 @@ double randgauss(double mean, double delta) {
 		}
 
 		phase = 1 - phase;
-	} while (Z > 3 || Z < -3); //discard |Z|>3*delta
+	} while (Z > 3 || Z < -3); //discard if |Z|>3*delta
 	return (mean + Z * delta);
 }
 

@@ -3,15 +3,16 @@ PROJECT_ROOT = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 ifneq  ($(OS:Windows%=WIN) ,WIN)
 
-#  No Windows
+#  Not Windows
 EXE = sim6730
+
 else
 
 #  WINDOWs
 EXE = sim6730.exe
 
 ifeq  (,$(findstring cygwin,$(PATH)))
-#do not install cygwin
+#haven't install cygwin
 RM=del
 
 endif
@@ -20,7 +21,7 @@ endif
 OBJS =  pq.o engine.o application.o
 
 #ifeq ($(BUILD_MODE),debug)
-	CFLAGS += -g  -Wall
+ 	CFLAGS += -g  -Wall -lm
 #else ifeq ($(BUILD_MODE),run)
 #	CFLAGS += -O2 -Wall -g
 #else

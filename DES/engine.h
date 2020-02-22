@@ -29,7 +29,7 @@ struct EventData {
 	struct 		Product *Prod; 	// Arriving or departing product;
 	int 		CompID;				// ID of component where product is created, arrives, or departs
 	double 		Event_begin_time;	//begin time of service or queue
-	int 		Pre_compid;
+	int 		Pre_compid;		//the ID of previous component
 
 };
 
@@ -47,7 +47,7 @@ PrioQ 	*FEL; //future event list (FEL), which is a priority queue
 
 int 	*idx;//mapping index (to Comp ID)
 int 	limit_cnt;
-int 	customID;
+int 	prodID; //cnt for generated prod
 int 	total_prod;
 
 
@@ -99,8 +99,8 @@ struct Product {
 	double 		Que_time;//total queuing time through system
 	int 		Que_cnt;	//Queuing station count
 	double 		Cost;
-	int tag ; //if true switch by SWitch status  else by tag_part
-	int tag_part;
+	int tag ;
+	int tag_part;	// tag for identifying C1 and C2
 };
 
 
