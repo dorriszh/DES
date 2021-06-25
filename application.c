@@ -34,6 +34,7 @@ struct Generator {
 	int Limit_status;
 	int Discard;
 	int Line;
+	int Batch;  // is batch?
 	FF_head_t *Next_que;
 //int mult;
 
@@ -209,7 +210,7 @@ void Arrival(struct EventData *e) {
 			cur_Event->EventType = ARRIVAL;
 			for (i = 1; i < pAnd->num; i++) {
 				and_Event = (struct EventData*) FIFO_out(pAnd->And_Que[i]); //get parts from Queue
-				cur_Event->Prod->Que_time += and_Event->Prod->Que_time;
+				if(cur_Event->Prod->Que_time < and_Event->Prod->Que_time) cur_Event->Prod->Que_time = and_Event->Prod->Que_time;
 				cur_Event->Prod->Cost += and_Event->Prod->Cost; //sum cost
 				free(and_Event->Prod);
 				free(and_Event);
@@ -236,8 +237,8 @@ void Arrival(struct EventData *e) {
 		(pExit->Count)++;  		// number of exiting Prods
 		(pExit->total_time) += ex_time;
 		pExit->total_cost += e->Prod->Cost;
-		if (pExit->tag == 1)
-			total_prod--;   //count acceptable product
+		//if (pExit->tag == 1)
+		//	total_prod--;   //count acceptable product
 
 		//free memory
 		free(e->Prod);
@@ -297,41 +298,57 @@ void NewProdt(int compID) {
 	//struct Customer *cur_custom, *NewCust;
 	struct Product *NewProd;
 	struct Generator *pGen;
+	int batch_cnt=0;
 
 	pGen = (struct Generator*) comp_list[compID].Comp;
-	NewProd = malloc(sizeof(struct Product));
-	ASSERT(NewProd!=NULL);
-	//if (pGen->Countprod>pGen->mult*total_prod) return;
+	do {
+		if ((pGen->Countprod) >= total_prod)     // >plan number
+			break;
 
-	NewProd->ProductID = prodID++; // Product ID
+		if (pGen->Batch == 1 && batch_cnt >= batch)   // have generated a batch
+			break;
+		batch_cnt++;
+		NewProd = malloc(sizeof(struct Product));
+		ASSERT(NewProd!=NULL);
+		//if (pGen->Countprod>pGen->mult*total_prod) return;
+		 NewProd->trigger_next=1;
+		if(pGen->Batch !=0 && batch_cnt!=1) NewProd->trigger_next=0;
 
-	(pGen->Countprod)++;
+		NewProd->ProductID = prodID++; // Product ID
 
-	NewProd->tag = false;
-	NewProd->tag_part = pGen->Line;
-	NewProd->Cost = pGen->Cost;
+		pGen->Countprod++;
+		//if ((pGen->Countprod)++ > total_prod)
+		//	break;;
 
-	d = malloc(sizeof(struct EventData));
-	ASSERT(d!=NULL);
+		NewProd->tag = false;
+		NewProd->tag_part = pGen->Line;
+		NewProd->Cost = pGen->Cost;
 
-	//init Product
-	d->EventType = DEPARTURE;
-	d->Prod = NewProd;
-	d->CompID = compID;
+		d = malloc(sizeof(struct EventData));
+		ASSERT(d!=NULL);
 
-	d->Prod->Que_cnt = 0;
-	d->Prod->Que_time = 0;
+		//init Product
+		d->EventType = DEPARTURE;
+		d->Prod = NewProd;
+		d->CompID = compID;
 
-	// generate gauss  random number
-	ts = randgauss(pGen->IntArrTime, pGen->Delta);
-	// Time when prod will enter system ;
-	//if (ts<0.001) ts=0.001;
-	ts += CurrentTime();
-	//d->Cust->Generation_time=ts;
-	////////////////////////////////////////////////////////
-	//ts is the actual time when product will  enter system
-	///////////////////////////////////////////////////////
-	Schedule(ts, d);
+		d->Prod->Que_cnt = 0;
+		d->Prod->Que_time = 0;
+		if (batch_cnt==1)
+		{
+			// generate gauss  random number
+			ts = randgauss(pGen->IntArrTime, pGen->Delta);
+			// Time when prod will enter system ;
+			//if (ts<0.001) ts=0.001;
+			ts += CurrentTime();
+		}
+		//d->Cust->Generation_time=ts;
+		////////////////////////////////////////////////////////
+		//ts is the actual time when product will  enter system
+		///////////////////////////////////////////////////////
+		Schedule(ts, d);
+	} while (pGen->Batch != 0);
+
 }
 
 void Departure(struct EventData *e)
@@ -365,7 +382,8 @@ void Departure(struct EventData *e)
 
 		/////////////////////////////////////////////
 		// Create a new product && add to FEL
-		NewProdt(e->CompID);
+		if (e->Prod->trigger_next==1)
+		NewProdt(e->CompID);  // only  trigger_next==1, trigger New product
 		/////////////////////////////////////////////
 
 		//a negligible (i.e., zero) amount of time to travel between components.
@@ -580,16 +598,35 @@ int main(int argc, char *argv[]) {
 		printf("usage: %s [runsim] [configfile] [outputfile]\n", argv[0]);
 		exit(-1);
 	}
+	//input parameter
+	while(1)
+		{
+			setbuf(stdin, NULL);
+			setbuf(stdout, NULL);
+			printf("\nInput the product number of new order:");
+			if(scanf("%d",&plan_prod)==1) break;
+		}
 
 	while(1)
 	{
 		setbuf(stdin, NULL);
 		setbuf(stdout, NULL);
-		printf("\nInput the product number:");
+		printf("\nInput the product number of your plan:");
 		if(scanf("%d",&total_prod)==1) break;
 
 	}
+	while(1)
+		{
+			setbuf(stdin, NULL);
+			setbuf(stdout, NULL);
+			printf("\nInput number of each batch for external suppliers:");
+			if(scanf("%d",&batch)==1) break;
 
+		}
+
+//	plan_prod=100;
+//	total_prod=105;
+//	batch=20;
 	/////////////////////////////////////
 	/////////////input config &&init data
 	/////////////////////////////////////
@@ -662,6 +699,7 @@ int main(int argc, char *argv[]) {
 			fscanf(fp, "%lf", &G->Cost);
 			fscanf(fp, "%d", &dest_ID);
 			fscanf(fp, "%d", &G->Line);
+			fscanf(fp,"%d",&G->Batch);
 			//int limit_type;
 			G->Limit_status = false;
 			G->Limit_type = false;
@@ -861,6 +899,13 @@ int main(int argc, char *argv[]) {
 	//free(comp_list); //free comp_list memory && output statics;
 	double cost_sum = 0;
 	fp = fopen(argv[3], "w");
+	fprintf(fp, " order number :%d\n", plan_prod);
+	fprintf(fp, " plan  number :%d\n", total_prod);
+	fprintf(fp," batch  number :%d\n", batch);
+	printf("\n The result:\n");
+	printf(" order number :%d\n", plan_prod);
+	printf(" plan  number :%d\n", total_prod);
+	printf(" batch  number :%d\n", batch);
 	for (i = 0; i < cngline; i++) //free Component memory
 			{
 		if (comp_list[i].ComponentType == EXIT) {
@@ -870,6 +915,9 @@ int main(int argc, char *argv[]) {
 			fprintf(fp, "Comp:%d EXIT\n", idx[i]);
 			fprintf(fp, "  Number: %d\n", E->Count);
 			fprintf(fp, "Cost:%.2lf\n", E->total_cost);
+			printf("Comp:%d EXIT\n", idx[i]);
+						printf( "  Number: %d\n", E->Count);
+						printf("Cost:%.2lf\n", E->total_cost);
 			cost_sum += E->total_cost;
 		}
 
@@ -883,8 +931,10 @@ int main(int argc, char *argv[]) {
 		free(comp_list[i].Comp);
 
 	};
+
 	fprintf(fp, " Total Cost:%.2lf\n", cost_sum);
 	fprintf(fp, " Time is %.2lf", CurrentTime());
+	printf(" Time is %.2lf", CurrentTime());
 	printf(" Total Cost:%.2lf\n", cost_sum);
 
 	free(comp_list); //free comp_list memory

@@ -48,7 +48,9 @@ PrioQ 	*FEL; //future event list (FEL), which is a priority queue
 int 	*idx;//mapping index (to Comp ID)
 int 	limit_cnt;
 int 	prodID; //cnt for generated prod
-int 	total_prod;
+int 	total_prod; //order number
+int 	batch; //order number of material at one time
+int 	plan_prod; //plan number
 
 
 //////////////////////////////////////////////////////////////////////
@@ -101,6 +103,7 @@ struct Product {
 	double 		Cost;
 	int tag ;
 	int tag_part;	// tag for identifying C1 and C2
+	int trigger_next; //trigger for next batch;
 };
 
 

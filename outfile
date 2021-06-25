@@ -1,0 +1,11 @@
+ order number :100
+ plan  number :110
+ batch  number :110
+Comp:17 EXIT
+  Number: 104
+Cost:25896.00
+Comp:18 EXIT
+  Number: 6
+Cost:1494.00
+ Total Cost:27390.00
+ Time is 137230.09
